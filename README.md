@@ -16,7 +16,7 @@ And I want to make a collections of lightweight and developer friendly container
 
 Goals
 
-- lightweight but full features
+- lightweight with enough features
   - lightwight is still first priority
 - rootless friendly
   - prefer no root user
