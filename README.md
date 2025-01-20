@@ -19,7 +19,7 @@ Goals
 - lightweight with enough features
   - lightwight is still first priority
 - rootless friendly
-  - prefer no root user
+  - prefer non root user
   - assign a target user or align to real user easily
 - security (yes, in local env)
   - prefer TLS by default
