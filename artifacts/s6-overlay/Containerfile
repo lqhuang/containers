@@ -1,6 +1,6 @@
 # check=error=true
 
-FROM alpine:3.22
+FROM alpine:3.22 AS stage
 
 ARG TARGETARCH
 ARG S6_OVERLAY_VERSION
@@ -26,3 +26,7 @@ RUN <<-EOS
     tar -C "${S6_OVERLAY_ROOTFS}" -Jxpf /tmp/s6-overlay-noarch.tar.xz
     rm -rf /tmp/*
 EOS
+
+FROM scratch
+
+COPY --from=stage /opt/s6-overlay/rootfs /

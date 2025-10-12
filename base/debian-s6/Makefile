@@ -8,12 +8,12 @@ build:
 	docker buildx build \
 		-f Containerfile \
 		--tag ghcr.io/lqhuang/debian-s6:${DEBIAN_DIST_TAG} \
-		--tag lqhuang/debian-s6:${DEBIAN_DIST_TAG} \
+		--tag docker.io/lqhuang/debian-s6:${DEBIAN_DIST_TAG} \
 		--build-arg DEBIAN_DIST_TAG=${DEBIAN_DIST_TAG} \
 		--build-arg S6_OVERLAY_VERSION=${S6_OVERLAY_VERSION} \
-		--platform linux/amd64,linux/arm64,linux/riscv64 \
 		.
+		#--platform linux/amd64,linux/arm64,linux/riscv64 \
 
-# publish:
-# 	docker push lqhuang/caddy:${CADDY_VERSION}
-# 	docker push ghcr.io/lqhuang/caddy:${CADDY_VERSION}
+publish:
+	docker push docker.io/lqhuang/debian-s6:${DEBIAN_DIST_TAG}
+	docker push ghcr.io/lqhuang/debian-s6:${DEBIAN_DIST_TAG}
