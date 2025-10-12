@@ -6,11 +6,11 @@ build:
 	docker build \
 		-f Containerfile \
 		--pull \
-		--tag ghcr.io/lqhuang/artifact-s6-overlay:${S6_OVERLAY_VERSION} \
-		--tag lqhuang/artifact-s6-overlay:${S6_OVERLAY_VERSION} \
-		--build-arg S6_OVERLAY_VERSION=${S6_OVERLAY_VERSION} \
+		--tag ghcr.io/lqhuang/artifact-mise:${MISE_VERSION} \
+		--tag lqhuang/artifact-mise:${MISE_VERSION} \
+		--build-arg MISE_VERSION=${MISE_VERSION} \
 		.
-		#--platform linux/amd64,linux/arm64,linux/riscv64 \
+		# --platform linux/amd64,linux/arm64,linux/riscv64 \
 
 # publish:
 # 	docker push lqhuang/caddy:${CADDY_VERSION}

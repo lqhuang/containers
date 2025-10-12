@@ -1,0 +1,25 @@
+
+FROM alpine:3.22
+
+ARG TARGETARCH
+ARG CODE_CLI_VERSION
+ARG CODE_CLI_INSTALL_DIR="/opt/code-cli/bin"
+
+RUN apk add --no-cache ca-certificates curl xz gzip zstd
+
+RUN <<-EOS
+    set -eux -o pipefail
+    echo "Fetching code-cli version ${CODE_CLI_VERSION}"
+    case "${TARGETARCH}" in
+        amd64   ) export CODE_CLI_ARCH='x64'   ;;
+        arm64   ) export CODE_CLI_ARCH='arm64' ;;
+        *       ) echo -e "ERROR: Unsupported architecture for configured s6-overlay ${TARGETARCH}";
+                  exit 1 ;;
+    esac;
+    curl -fsSL \
+        "https://update.code.visualstudio.com/${CODE_CLI_VERSION}/cli-alpine-${CODE_CLI_ARCH}/stable" \
+        -o /tmp/vscode-cli.tar.gz
+    mkdir -p "${CODE_CLI_INSTALL_DIR}"
+    tar -C "${CODE_CLI_INSTALL_DIR}" -zxpf /tmp/vscode-cli.tar.gz
+    "${CODE_CLI_INSTALL_DIR}/code" --version
+EOS

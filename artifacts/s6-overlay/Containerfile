@@ -4,11 +4,12 @@ FROM alpine:3.22
 
 ARG TARGETARCH
 ARG S6_OVERLAY_VERSION
-ARG S6_OVERLAY_ROOTFS="/opt/s6-overlay-rootfs"
+ARG S6_OVERLAY_ROOTFS="/opt/s6-overlay/rootfs"
+
+RUN apk add --no-cache ca-certificates curl xz gzip zstd
 
 RUN <<-EOS
-    set -ex
-    apk add --no-cache ca-certificates curl xz
+    set -eux -o pipefail
     case "${TARGETARCH}" in
         amd64   ) export S6_OVERLAY_ARCH='x86_64'  ;;
         arm64   ) export S6_OVERLAY_ARCH='aarch64' ;;
@@ -17,8 +18,8 @@ RUN <<-EOS
                   exit 1 ;;
     esac;
     echo "Fetching s6-overlay version ${S6_OVERLAY_VERSION}"
-    curl -kfL -O --output-dir /tmp/ https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz
-    curl -kfL -O --output-dir /tmp/ https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz
+    curl -fsSL -O --output-dir /tmp/ https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz
+    curl -fsSL -O --output-dir /tmp/ https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz
     echo "Unpacking s6-overlay to ${S6_OVERLAY_ROOTFS}"
     mkdir -p "${S6_OVERLAY_ROOTFS}"
     tar -C "${S6_OVERLAY_ROOTFS}" -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz

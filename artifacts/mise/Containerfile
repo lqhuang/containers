@@ -1,0 +1,16 @@
+
+FROM alpine:3.22
+
+ARG MISE_INSTALL_PATH="/opt/mise/bin/mise"
+ARG MISE_VERSION
+
+RUN apk add --no-cache ca-certificates curl xz
+
+RUN <<-EOS
+    set -eux -o pipefail
+    echo "Installing mise version ${MISE_VERSION}"
+    echo "Installing mise to ${MISE_INSTALL_PATH}"
+    mkdir -p "$(dirname "${MISE_INSTALL_PATH}")"
+    curl -fsSL https://mise.run | sh
+    ${MISE_INSTALL_PATH} --version
+EOS

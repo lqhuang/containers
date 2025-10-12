@@ -1,0 +1,8 @@
+ARG ALPINE_VERSION=latest
+
+FROM alpine:${ALPINE_VERSION}
+
+ENV MIYANO_CELLAR_DIR="/miyano/cellar"
+
+RUN apk add --no-cache ca-certificates curl xz gzip zstd \
+    && mkdir -p "${MIYANO_CELLAR_DIR}"

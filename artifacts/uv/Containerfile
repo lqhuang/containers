@@ -1,0 +1,20 @@
+ARG MIYANO_VERSION
+
+FROM lqhuang/miyano:${MIYANO_VERSION}
+
+ARG UV_VERSION
+ARG UV_INSTALL_PREFIX="${MIYANO_CELLAR_DIR}/uv/${UV_VERSION}"
+ARG UV_INSTALL_DIR="${UV_INSTALL_PREFIX}/bin"
+
+RUN <<-EOS
+    set -eux -o pipefail
+    echo "Installing uv version ${UV_VERSION}"
+    echo "Installing uv to ${UV_INSTALL_DIR}"
+    mkdir -p ${UV_INSTALL_PREFIX}
+    curl -fsSL https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+    ${UV_INSTALL_PREFIX}/bin/uv --version
+    ${UV_INSTALL_PREFIX}/bin/uvx --version
+EOS
+
+# ghcr.io/astral-sh/uv:alpine
+# UV_TOOL_BIN_DIR is not work !!!
