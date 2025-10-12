@@ -42,3 +42,7 @@ NON-Goals
 - [docker-library/postgres](https://github.com/docker-library/postgres): Docker Official Image packaging for Postgres <http://www.postgresql.org>
 - [clearlinux/dockerfiles](https://github.com/clearlinux/dockerfiles): Clear Linux-based Docker containers
 - [slimtoolkit/slim](https://github.com/slimtoolkit/slim): Slim(toolkit): Don't change anything in your container image and minify it by up to 30x (and for compiled languages even more) making it secure too! (free and open source)
+
+https://github.com/nexsol-technologies/pgassistant-postgres-sample/blob/main/docker-compose.yml
+
+learn how to add extra cli options

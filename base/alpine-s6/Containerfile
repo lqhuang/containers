@@ -3,7 +3,7 @@
 ARG ALPINE_DIST_TAG="nonexistent"
 ARG S6_OVERLAY_VERSION="nonexistent"
 
-FROM lqhuang/artifact-s6-overlay:${S6_OVERLAY_VERSION} AS s6-stage
+FROM docker.io/lqhuang/artifact-s6-overlay:${S6_OVERLAY_VERSION} AS s6-stage
 
 FROM docker.io/alpine:${ALPINE_DIST_TAG}
 
