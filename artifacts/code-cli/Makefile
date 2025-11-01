@@ -6,10 +6,10 @@ build:
 	docker build \
 		-f Containerfile \
 		--pull \
-		--tag ghcr.io/lqhuang/artifact-code-cli:${CODE_CLI_VERSION} \
-		--tag lqhuang/artifact-code-cli:${CODE_CLI_VERSION} \
+		--tag ghcr.io/lqhuang/shiho/code-cli:${CODE_CLI_VERSION} \
 		--build-arg CODE_CLI_VERSION=${CODE_CLI_VERSION} \
 		.
+		# --tag lqhuang/shiho/code-cli:${CODE_CLI_VERSION} \
 		# --platform linux/amd64,linux/arm64,linux/riscv64 \
 
 # publish:

@@ -1,0 +1,8 @@
+ARG ALPINE_VERSION=latest
+
+FROM alpine:${ALPINE_VERSION}
+
+ENV SHIHO_CELLAR_DIR="/shiho/cellar"
+
+RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep \
+    && mkdir -p "${SHIHO_CELLAR_DIR}"

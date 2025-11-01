@@ -1,10 +1,15 @@
+# check=error=true
 
-FROM alpine:3.22
+ARG MISE_ROOTFS="/opt/mise"
 
-ARG MISE_INSTALL_PATH="/opt/mise/bin/mise"
+FROM alpine:3.22 AS stage
+
+ARG MISE_ROOTFS
 ARG MISE_VERSION
+# `MISE_INSTALL_PATH` is a option for https://mise.run script
+ARG MISE_INSTALL_PATH="${MISE_ROOTFS}/bin/mise"
 
-RUN apk add --no-cache ca-certificates curl xz
+RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
     set -eux -o pipefail
@@ -14,3 +19,9 @@ RUN <<-EOS
     curl -fsSL https://mise.run | sh
     ${MISE_INSTALL_PATH} --version
 EOS
+
+FROM scratch
+
+ARG MISE_ROOTFS
+
+COPY --from=stage "${MISE_ROOTFS}" /opt/cellar/mise

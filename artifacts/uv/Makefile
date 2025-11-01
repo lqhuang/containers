@@ -5,11 +5,10 @@ include ${CURR_MKFILE_DIR}/default.env
 build:
 	docker build \
 		-f Containerfile \
-		--tag ghcr.io/lqhuang/artifact-uv:${UV_VERSION} \
-		--tag lqhuang/artifact-uv:${UV_VERSION} \
+		--tag ghcr.io/lqhuang/shiho/uv:${UV_VERSION} \
 		--build-arg UV_VERSION=${UV_VERSION} \
-		--build-arg MIYANO_VERSION=${MIYANO_VERSION} \
 		.
+		# --tag lqhuang/shiho/uv:${UV_VERSION} \
 		# --platform linux/amd64,linux/arm64,linux/riscv64 \
 
 # publish:

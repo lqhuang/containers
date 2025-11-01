@@ -3,11 +3,11 @@
 ARG DEBIAN_DIST_TAG="nonexistent"
 ARG S6_OVERLAY_VERSION="nonexistent"
 
-FROM docker.io/lqhuang/artifact-s6-overlay:${S6_OVERLAY_VERSION} AS s6-stage
+FROM ghcr.io/lqhuang/shiho/s6-overlay:${S6_OVERLAY_VERSION} AS shiho-s6-overlay
 
 FROM docker.io/debian:${DEBIAN_DIST_TAG}
 
-COPY --from=s6-stage / /
+COPY --from=shiho-s6-overlay /opt/cellar/s6-overlay/ /
 
 ENV LANG="C.UTF-8"
 

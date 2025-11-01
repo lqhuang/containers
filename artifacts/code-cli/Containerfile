@@ -1,11 +1,15 @@
+# check=error=true
 
-FROM alpine:3.22
+ARG CODE_CLI_ROOFS="/opt/code-cli"
+ARG CODE_CLI_INSTALL_DIR="${CODE_CLI_ROOFS}/bin"
+
+FROM alpine:3.22 AS stage
 
 ARG TARGETARCH
 ARG CODE_CLI_VERSION
-ARG CODE_CLI_INSTALL_DIR="/opt/code-cli/bin"
+ARG CODE_CLI_INSTALL_DIR
 
-RUN apk add --no-cache ca-certificates curl xz gzip zstd
+RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
     set -eux -o pipefail
@@ -23,3 +27,9 @@ RUN <<-EOS
     tar -C "${CODE_CLI_INSTALL_DIR}" -zxpf /tmp/vscode-cli.tar.gz
     "${CODE_CLI_INSTALL_DIR}/code" --version
 EOS
+
+FROM scratch
+
+ARG CODE_CLI_ROOFS
+
+COPY --from=stage "${CODE_CLI_ROOFS}" /opt/cellar/code-cli/

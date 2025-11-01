@@ -6,8 +6,8 @@ build:
 	docker build \
 		-f Containerfile \
 		--pull \
-		--tag ghcr.io/lqhuang/miyano:3.22 \
-		--tag docker.io/lqhuang/miyano:3.22 \
+		--tag ghcr.io/lqhuang/shiho:3.22 \
+		--tag docker.io/lqhuang/shiho:3.22 \
 		.
 		# --platform linux/amd64,linux/arm64,linux/riscv64 \
 

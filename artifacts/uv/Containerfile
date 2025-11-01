@@ -1,10 +1,12 @@
-ARG MIYANO_VERSION
+# check=error=true
 
-FROM lqhuang/miyano:${MIYANO_VERSION}
+FROM alpine:3.22 AS stage
 
 ARG UV_VERSION
-ARG UV_INSTALL_PREFIX="${MIYANO_CELLAR_DIR}/uv/${UV_VERSION}"
+ARG UV_INSTALL_PREFIX="/opt/uv"
 ARG UV_INSTALL_DIR="${UV_INSTALL_PREFIX}/bin"
+
+RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
     set -eux -o pipefail
@@ -14,7 +16,12 @@ RUN <<-EOS
     curl -fsSL https://astral.sh/uv/${UV_VERSION}/install.sh | sh
     ${UV_INSTALL_PREFIX}/bin/uv --version
     ${UV_INSTALL_PREFIX}/bin/uvx --version
+
+    ls -la ${UV_INSTALL_DIR}
 EOS
 
-# ghcr.io/astral-sh/uv:alpine
-# UV_TOOL_BIN_DIR is not work !!!
+FROM scratch
+
+ARG UV_INSTALL_PREFIX
+
+COPY --from=stage "${UV_INSTALL_PREFIX}" /opt/cellar/uv

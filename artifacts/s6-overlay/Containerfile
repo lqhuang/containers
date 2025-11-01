@@ -1,12 +1,14 @@
 # check=error=true
 
+ARG S6_OVERLAY_ROOTFS="/opt/s6-overlay"
+
 FROM alpine:3.22 AS stage
 
 ARG TARGETARCH
 ARG S6_OVERLAY_VERSION
-ARG S6_OVERLAY_ROOTFS="/opt/s6-overlay/rootfs"
+ARG S6_OVERLAY_ROOTFS
 
-RUN apk add --no-cache ca-certificates curl xz gzip zstd
+RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
     set -eux -o pipefail
@@ -29,4 +31,6 @@ EOS
 
 FROM scratch
 
-COPY --from=stage /opt/s6-overlay/rootfs /
+ARG S6_OVERLAY_ROOTFS
+
+COPY --from=stage "${S6_OVERLAY_ROOTFS}" /opt/cellar/s6-overlay
