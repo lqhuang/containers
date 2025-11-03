@@ -4,7 +4,6 @@ ARG DEBIAN_DIST_TAG="nonexistent"
 
 ARG BUILD_OUTPUTS="/opt/cellar"
 
-
 FROM docker.io/debian:${DEBIAN_DIST_TAG} AS build
 
 ARG WOLFSSL_VERSION
@@ -20,7 +19,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt -y update && \
     apt --no-install-recommends install -y \
         ca-certificates \
-        git sed \
+        sed \
         build-essential \
         musl-dev musl-tools \
         automake autoconf libtool libltdl-dev
