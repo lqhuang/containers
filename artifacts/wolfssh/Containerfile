@@ -1,0 +1,105 @@
+# check=error=true
+
+ARG DEBIAN_DIST_TAG="nonexistent"
+
+ARG BUILD_OUTPUTS="/opt/cellar"
+
+
+FROM docker.io/debian:${DEBIAN_DIST_TAG} AS build
+
+ARG WOLFSSL_VERSION
+ARG WOLFSSH_VERSION
+ARG LIBXCRYPT_VERSION
+
+ARG DEBIAN_FRONTEND="noninteractive"
+ARG BUILDROOT="/buildroot"
+ARG BUILD_OUTPUTS
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt -y update && \
+    apt --no-install-recommends install -y \
+        ca-certificates \
+        git sed \
+        build-essential \
+        musl-dev musl-tools \
+        automake autoconf libtool libltdl-dev
+
+WORKDIR ${BUILDROOT}
+ADD https://github.com/besser82/libxcrypt.git#${LIBXCRYPT_VERSION:?} ${BUILDROOT}/libxcrypt
+ADD https://github.com/wolfSSL/wolfssl.git#${WOLFSSL_VERSION:?}-stable ${BUILDROOT}/wolfssl
+ADD https://github.com/wolfSSL/wolfssh.git#${WOLFSSH_VERSION:?}-stable ${BUILDROOT}/wolfssh
+
+SHELL ["/bin/bash", "-c"]
+RUN <<-EOS
+    #!/bin/bash
+    set -eux -o pipefail
+
+    mkdir -p ${BUILD_OUTPUTS}
+    # git clone --depth 1 --single-branch --branch ${WOLFSSL_VERSION:?}-stable https://github.com/wolfSSL/wolfssl.git
+    # git clone --depth 1 --single-branch --branch ${WOLFSSH_VERSION:?}-stable https://github.com/wolfSSL/wolfssh.git
+    # git clone --depth 1 --single-branch --branch ${LIBXCRYPT_VERSION:?} https://github.com/besser82/libxcrypt.git
+
+    for D in "wolfssl" "wolfssh" "libxcrypt"; do
+      pushd "$D"
+      ./autogen.sh
+      popd
+    done
+
+    # Build wolfssl
+    pushd wolfssl
+
+    CC=musl-gcc \
+      LDFLAGS="-static" \
+      ./configure --prefix=${BUILD_OUTPUTS}/wolfssl \
+      --enable-wolfssh --enable-keygen \
+      --disable-examples
+    make install
+
+    popd
+
+    # Build libxcrypt
+    pushd libxcrypt
+
+    sed --in-place 's|linux/mman.h|sys/mman.h|' lib/alg-yescrypt-platform.c
+    CC=musl-gcc \
+      CFLAGS="-static -DMAP_HUGE_2MB=0" \
+      ./configure --prefix=${BUILD_OUTPUTS}/libxcrypt \
+      --enable-hashes=strong \
+      --enable-obsolete-api=glibc \
+      --enable-year2038
+    make install
+
+    popd
+
+    # Build wolfssh against wolfssl and libxcrypt
+    pushd wolfssh
+
+    sed --in-place 's|<sys/errno.h>|<errno.h>|' apps/wolfsshd/wolfsshd.c
+    CC=musl-gcc \
+      CFLAGS="-I${BUILD_OUTPUTS}/libxcrypt/include" \
+      LDFLAGS="-static -L${BUILD_OUTPUTS}/libxcrypt/lib" \
+      ./configure \
+      --prefix="${BUILD_OUTPUTS}/wolfssh" \
+      --with-wolfssl="${BUILD_OUTPUTS}/wolfssl" \
+      --enable-distro \
+      --disable-examples
+    make install
+
+    popd
+
+    # Validate and test
+    for exe in "wolfssh" "wolfsshd"; do
+        readelf -d ${BUILD_OUTPUTS}/wolfssh/bin/${exe}
+        #${BUILD_OUTPUTS}/wolfssh/bin/${exe} --version
+        #What? `wolfssh --version` exits 1 ... !!??
+    done
+    ${BUILD_OUTPUTS}/wolfssh/bin/wolfsshd --version
+
+EOS
+
+FROM scratch
+
+ARG BUILD_OUTPUTS
+
+COPY --from=build ${BUILD_OUTPUTS}/wolfssh/bin/ /opt/cellar/wolfssh/bin/
