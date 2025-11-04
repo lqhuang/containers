@@ -3,6 +3,7 @@
 ARG DEBIAN_DIST_TAG="nonexistent"
 
 ARG BUILD_OUTPUTS="/opt/cellar"
+ARG WOLFSSH_PREFIX="${BUILD_OUTPUTS}/wolfssh"
 
 FROM docker.io/debian:${DEBIAN_DIST_TAG} AS build
 
@@ -13,6 +14,7 @@ ARG LIBXCRYPT_VERSION
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG BUILDROOT="/buildroot"
 ARG BUILD_OUTPUTS
+ARG WOLFSSH_PREFIX
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -79,7 +81,7 @@ RUN <<-EOS
       CFLAGS="-I${BUILD_OUTPUTS}/libxcrypt/include" \
       LDFLAGS="-static -L${BUILD_OUTPUTS}/libxcrypt/lib" \
       ./configure \
-      --prefix="${BUILD_OUTPUTS}/wolfssh" \
+      --prefix="${WOLFSSH_PREFIX}" \
       --with-wolfssl="${BUILD_OUTPUTS}/wolfssl" \
       --enable-distro \
       --disable-examples
@@ -99,6 +101,6 @@ EOS
 
 FROM scratch
 
-ARG BUILD_OUTPUTS
+ARG WOLFSSH_PREFIX
 
-COPY --from=build ${BUILD_OUTPUTS}/wolfssh/bin/ /opt/cellar/wolfssh/bin/
+COPY --from=build ${WOLFSSH_PREFIX} ${WOLFSSH_PREFIX}

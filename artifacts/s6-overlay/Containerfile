@@ -1,6 +1,6 @@
 # check=error=true
 
-ARG S6_OVERLAY_ROOTFS="/opt/s6-overlay"
+ARG S6_OVERLAY_ROOTFS="/opt/cellar/s6-overlay"
 
 FROM alpine:3.22 AS stage
 
@@ -33,4 +33,4 @@ FROM scratch
 
 ARG S6_OVERLAY_ROOTFS
 
-COPY --from=stage "${S6_OVERLAY_ROOTFS}" /opt/cellar/s6-overlay
+COPY --from=stage "${S6_OVERLAY_ROOTFS}" "${S6_OVERLAY_ROOTFS}"

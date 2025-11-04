@@ -1,13 +1,13 @@
 # check=error=true
 
-ARG MISE_ROOTFS="/opt/mise"
+ARG MISE_PREFIX="/opt/cellar/mise"
 
 FROM alpine:3.22 AS stage
 
-ARG MISE_ROOTFS
+ARG MISE_PREFIX
 ARG MISE_VERSION
 # `MISE_INSTALL_PATH` is a option for https://mise.run script
-ARG MISE_INSTALL_PATH="${MISE_ROOTFS}/bin/mise"
+ARG MISE_INSTALL_PATH="${MISE_PREFIX}/bin/mise"
 
 RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
@@ -16,12 +16,12 @@ RUN <<-EOS
     echo "Installing mise version ${MISE_VERSION}"
     echo "Installing mise to ${MISE_INSTALL_PATH}"
     mkdir -p "$(dirname "${MISE_INSTALL_PATH}")"
-    curl -fsSL https://mise.run | sh
+    curl -f#SL https://mise.run | sh
     ${MISE_INSTALL_PATH} --version
 EOS
 
 FROM scratch
 
-ARG MISE_ROOTFS
+ARG MISE_PREFIX
 
-COPY --from=stage "${MISE_ROOTFS}" /opt/cellar/mise
+COPY --from=stage "${MISE_PREFIX}" "${MISE_PREFIX}"

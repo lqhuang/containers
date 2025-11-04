@@ -1,18 +1,19 @@
 # check=error=true
 
-ARG CODE_CLI_ROOFS="/opt/code-cli"
-ARG CODE_CLI_INSTALL_DIR="${CODE_CLI_ROOFS}/bin"
+ARG CODE_CLI_PREFIX="/opt/cellar/code-cli/"
 
 FROM alpine:3.22 AS stage
 
 ARG TARGETARCH
 ARG CODE_CLI_VERSION
-ARG CODE_CLI_INSTALL_DIR
+ARG CODE_CLI_PREFIX
 
 RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
+    #!/bin/bash
     set -eux -o pipefail
+
     echo "Fetching code-cli version ${CODE_CLI_VERSION}"
     case "${TARGETARCH}" in
         amd64   ) export CODE_CLI_ARCH='x64'   ;;
@@ -20,16 +21,19 @@ RUN <<-EOS
         *       ) echo -e "ERROR: Unsupported architecture for configured s6-overlay ${TARGETARCH}";
                   exit 1 ;;
     esac;
-    curl -fsSL \
+
+    curl -f#SL \
         "https://update.code.visualstudio.com/${CODE_CLI_VERSION}/cli-alpine-${CODE_CLI_ARCH}/stable" \
         -o /tmp/vscode-cli.tar.gz
-    mkdir -p "${CODE_CLI_INSTALL_DIR}"
-    tar -C "${CODE_CLI_INSTALL_DIR}" -zxpf /tmp/vscode-cli.tar.gz
-    "${CODE_CLI_INSTALL_DIR}/code" --version
+    mkdir -p "${CODE_CLI_PREFIX}/bin"
+    tar -C "${CODE_CLI_PREFIX}/bin" -zxpf /tmp/vscode-cli.tar.gz
+    "${CODE_CLI_PREFIX}/bin/code" --version
+
+    rm -r /tmp/*
 EOS
 
 FROM scratch
 
-ARG CODE_CLI_ROOFS
+ARG CODE_CLI_PREFIX
 
-COPY --from=stage "${CODE_CLI_ROOFS}" /opt/cellar/code-cli/
+COPY --from=stage "${CODE_CLI_PREFIX}" /opt/cellar/code-cli/

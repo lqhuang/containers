@@ -3,25 +3,27 @@
 FROM alpine:3.22 AS stage
 
 ARG UV_VERSION
-ARG UV_INSTALL_PREFIX="/opt/uv"
-ARG UV_INSTALL_DIR="${UV_INSTALL_PREFIX}/bin"
+ARG UV_PREFIX="/opt/cellar/uv"
+ARG UV_INSTALL_DIR="${UV_PREFIX}/bin"
 
 RUN apk add --no-cache ca-certificates curl xz gzip zstd ripgrep
 
 RUN <<-EOS
+    #!/bin/bash
     set -eux -o pipefail
     echo "Installing uv version ${UV_VERSION}"
     echo "Installing uv to ${UV_INSTALL_DIR}"
-    mkdir -p ${UV_INSTALL_PREFIX}
-    curl -fsSL https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-    ${UV_INSTALL_PREFIX}/bin/uv --version
-    ${UV_INSTALL_PREFIX}/bin/uvx --version
+
+    mkdir -p ${UV_PREFIX}
+    curl -f#SL https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+    ${UV_PREFIX}/bin/uv --version
+    ${UV_PREFIX}/bin/uvx --version
 
     ls -la ${UV_INSTALL_DIR}
 EOS
 
 FROM scratch
 
-ARG UV_INSTALL_PREFIX
+ARG UV_PREFIX
 
-COPY --from=stage "${UV_INSTALL_PREFIX}" /opt/cellar/uv
+COPY --from=stage "${UV_PREFIX}" "${UV_PREFIX}"

@@ -1,0 +1,42 @@
+# check=error=true
+
+ARG CODE_SERVER_PREFIX="/opt/cellar/code-server"
+
+FROM docker.io/debian:13.1-slim AS stage
+
+ARG TARGETARCH
+ARG CODE_SERVER_PREFIX
+ARG CODE_SERVER_VERSION
+ARG DOWNLOADED_ARTIFACT="code-server-${CODE_SERVER_VERSION}-linux-${TARGETARCH}.tar.gz"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates curl xz-utils gzip zstd \
+      ripgrep sed tree && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /var/log/* && \
+    rm -rf /usr/share/man /usr/share/locale /usr/share/info
+
+ADD https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server-${CODE_SERVER_VERSION}-linux-${TARGETARCH}.tar.gz /tmp/${DOWNLOADED_ARTIFACT}
+
+RUN <<-EOS
+    #!/bin/bash
+
+    set -eux -o pipefail
+
+    echo "Installing `code-server` version ${CODE_SERVER_VERSION}"
+    echo "Installing `code-server` to ${CODE_SERVER_PREFIX}"
+
+    mkdir -p "${CODE_SERVER_PREFIX}/lib" "${CODE_SERVER_PREFIX}/bin"
+    tar -C "${CODE_SERVER_PREFIX}/lib" -xzf "/tmp/${DOWNLOADED_ARTIFACT}"
+    mv -f ${CODE_SERVER_PREFIX}/lib/code-server-${CODE_SERVER_VERSION}-linux-${TARGETARCH} ${CODE_SERVER_PREFIX}/lib/code-server-${CODE_SERVER_VERSION}
+    ln -fs ${CODE_SERVER_PREFIX}/lib/code-server-${CODE_SERVER_VERSION}/bin/code-server ${CODE_SERVER_PREFIX}/bin/code-server
+
+    ${CODE_SERVER_PREFIX}/bin/code-server --version
+    rm -r /tmp/*
+EOS
+
+FROM scratch
+
+ARG CODE_SERVER_PREFIX
+
+COPY --from=stage "${CODE_SERVER_PREFIX}" "${CODE_SERVER_PREFIX}"
